@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Panel Inicial — Control de Ingreso/Egreso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        :root {
+            --brand: #1a3b5d;
+            --brand-2: #0d6efd;
+            --ok: #2e7d32;
+            --card: #fff;
+            --shadow: 0 10px 28px rgba(16, 24, 40, .08);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #f9fbff 0, #eef3ff 100%);
+            margin: 0;
+            color: #1f2937;
+            padding: 16px;
+            font-size: 17px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: var(--brand);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .button-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        @media(min-width:700px) {
+            .button-grid {
+                grid-template-columns: 1fr 1fr 1fr;
+                max-width: 900px;
+            }
+        }
+
+        .main-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border-left: 6px solid var(--brand-2);
+            color: var(--brand);
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            text-decoration: none;
+        }
+
+        .main-btn i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: var(--brand-2);
+        }
+
+        .main-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 32px rgba(16, 24, 40, .12);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Control de Ingreso y Egreso - Zárate</h1>
+
+    <div class="button-grid">
+        <a href="https://sites.google.com/softys.com/porteria/vehiculos?authuser=1" class="main-btn">
+            <i class="fa-solid fa-car"></i>
+            Vehículos
+        </a>
+        <a href="https://sites.google.com/softys.com/porteria/camiones-v3?authuser=1" class="main-btn">
+            <i class="fa-solid fa-truck"></i>
+            Camiones
+        </a>
+        <a href="https://sites.google.com/softys.com/porteria/administrativos-v2?authuser=1" class="main-btn">
+            <i class="fa-solid fa-user-tie"></i>
+            Administrativos
+        </a>
+    </div>
+
+</body>
+
+</html>

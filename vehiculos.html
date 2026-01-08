@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Control de Ingreso y Egreso de Vehículos — Zárate</title>
+
+    <!-- Flatpickr & Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
+    <style>
+        :root {
+            --brand: #1a3b5d;
+            --brand-2: #0d6efd;
+            --ok: #2e7d32;
+            --bg: #f5f7fb;
+            --card: #fff;
+            --shadow: 0 10px 28px rgba(16, 24, 40, .08);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #f9fbff 0, #eef3ff 100%);
+            margin: 0;
+            color: #1f2937;
+            padding: 16px;
+            font-size: 17px;
+        }
+
+        button,
+        input,
+        select {
+            font-size: 17px
+        }
+
+        a,
+        button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation
+        }
+
+        /* Topbar */
+        .topbar {
+            max-width: 1910px;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #e8f0ff;
+            color: #0b4fd4;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        /* Navegación de pestañas */
+        .nav-tabs {
+            max-width: 1910px;
+            margin: 0 auto 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .nav-tabs button {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            transition: .2s;
+        }
+
+        .nav-tabs button.active {
+            color: var(--brand-2);
+            border-bottom-color: var(--brand-2);
+        }
+
+        .nav-tabs button:hover {
+            color: var(--brand);
+        }
+
+        /* Contenido de pestañas */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Card form */
+        .container {
+            max-width: 1120px;
+            margin: 0 auto 14px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px 16px 8px;
+            border-left: 6px solid var(--ok);
+        }
+
+        .form-title,
+        .table-title {
+            margin: 0 0 12px;
+            color: var(--brand);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        @media (orientation:landscape) and (min-width:900px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        .form-section label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d0d7e2;
+            border-radius: 12px;
+            background: #fbfcff;
+            min-height: 44px;
+            transition: .15s border-color ease;
+        }
+
+        .form-section input:focus,
+        .form-section select:focus {
+            outline: none;
+            border-color: var(--brand-2);
+        }
+
+        .input-contenedor {
+            position: relative;
+        }
+
+        .input-contenedor button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 44px;
+            border: none;
+            border-radius: 10px;
+            background: #e6ecff;
+            color: #123a8c;
+            cursor: pointer;
+        }
+
+        .boton-registrar {
+            grid-column: 1/-1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--ok);
+            color: #fff;
+            font-weight: 700;
+            min-height: 48px;
+            position: sticky;
+            bottom: 8px;
+            z-index: 5;
+        }
+
+        .boton-registrar:hover {
+            filter: brightness(.95)
+        }
+
+        #mensajeExito,
+        #mensajeError {
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        #mensajeExito {
+            color: #2e7d32
+        }
+
+        #mensajeError {
+            color: #b00020
+        }
+
+        /* Tabla */
+        .container-full-width {
+            max-width: 1910px;
+            margin: 14px auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0 12px;
+        }
+
+        .filters .chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #d0d7e2;
+            background: #f7f9ff;
+            cursor: pointer;
+            font-weight: 600;
+            min-height: 44px;
+        }
+
+        .filters .chip.activo {
+            background: var(--brand-2);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .table-container {
+            overflow: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #f2f6ff;
+            z-index: 1;
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #dbe2ef;
+        }
+
+        tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #eef2f7;
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafcff
+        }
+
+        tr.pendiente {
+            background: #fff7e6
+        }
+
+        .table-container input[type="text"],
+        .table-container input[type="datetime-local"] {
+            width: 95%;
+            padding: 8px 10px;
+            border: 1px solid #d0d7e2;
+            border-radius: 10px;
+            background: #fff;
+            min-height: 40px;
+        }
+
+        .table-container button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 10px;
+            background: #0b7a3a;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            min-height: 40px;
+        }
+
+        /* UX helpers */
+        #pte_numero {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="topbar">
+        <h2 class="form-title">Control de Ingreso y Egreso de Vehículos</h2>
+        <span class="badge"><i class="fa-solid fa-industry"></i> Planta: Zárate</span>
+    </div>
+
+    <!-- NAVEGACIÓN DE PESTAÑAS -->
+    <div class="nav-tabs">
+        <button class="active" onclick="cambiarTab('registro')">📝 Registrar Ingreso</button>
+        <button onclick="cambiarTab('pendientes')">📋 Pendientes de Salida</button>
+    </div>
+
+    <!-- TAB: REGISTRO -->
+    <div id="tab-registro" class="tab-content active">
+        <div class="container">
+            <form id="registroForm">
+                <div class="form-grid">
+                    <div class="form-section">
+                        <label for="planta">Planta</label>
+                        <select id="planta" name="planta" required>
+                            <option value="">Seleccionar planta</option>
+                            <option value="Zárate" selected>Zárate</option>
+                        </select>
+                    </div>
+                    <div class="form-section">
+                        <label for="porteria">Portería</label>
+                        <select id="porteria" name="porteria" required>
+                            <option value="">Seleccionar portería</option>
+                            <option value="Porteria 1">Portería 1</option>
+                            <option value="Porteria 2">Portería 2</option>
+                        </select>
+                    </div>
+                    <div class="form-section">
+                        <label for="entrada">Entrada</label>
+                        <div class="input-contenedor">
+                            <input type="datetime-local" id="entrada" name="entrada" required enterkeyhint="next" />
+                            <button type="button" id="set-now" title="Ahora"><i
+                                    class="fa-regular fa-clock"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <label for="dni">DNI</label>
+                        <div class="input-contenedor">
+                            <input type="text" id="dni" name="dni" inputmode="numeric" pattern="[0-9]*"
+                                placeholder="Solo números" required enterkeyhint="search" />
+                            <button type="button" id="boton-dni" title="Buscar por DNI"><i
+                                    class="fa-solid fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <label for="pte_numero">Patente</label>
+                        <input type="text" id="pte_numero" name="pte_numero" placeholder="AAA123 o AA123BB" required
+                            inputmode="latin" enterkeyhint="next" />
+                    </div>
+                    <div class="form-section">
+                        <label for="apellido_nombre">Apellido y Nombre</label>
+                        <input type="text" id="apellido_nombre" name="apellido_nombre" required enterkeyhint="next" />
+                    </div>
+                    <div class="form-section">
+                        <label for="empresa">Empresa</label>
+                        <input type="text" id="empresa" name="empresa" placeholder="Opcional" enterkeyhint="next" />
+                    </div>
+                    <div class="form-section">
+                        <label for="ingreso_remitos">Ingreso Remitos</label>
+                        <input type="text" id="ingreso_remitos" name="ingreso_remitos" placeholder="Opcional"
+                            enterkeyhint="done" />
+                    </div>
+                    <button type="submit" class="boton-registrar">Registrar</button>
+                </div>
+                <div id="mensajeExito" aria-live="polite"></div>
+                <div id="mensajeError" aria-live="assertive"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB: PENDIENTES -->
+    <div id="tab-pendientes" class="tab-content">
+        <div class="container-full-width">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <h3 class="table-title" style="margin:0;">Vehículos Pendientes de Salida</h3>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <button id="btn-refresh" type="button" onclick="cargarVehiculosPendientes()"
+                        style="padding:8px 14px;border:none;border-radius:8px;background:var(--brand-2);color:#fff;font-weight:600;cursor:pointer;min-height:40px;">
+                        🔄 Actualizar
+                    </button>
+                    <div id="cargando">🔄 Cargando registros...</div>
+                </div>
+            </div>
+            <div class="filters" role="group" aria-label="Filtros de planta y portería">
+                <button class="chip activo" data-planta="Zárate" data-porteria=""
+                    onclick="filtrarPorPlanta('Zárate')">Zárate (Todas)</button>
+                <button class="chip" data-planta="Zárate" data-porteria="Porteria 1"
+                    onclick="filtrarPorPorteria('Porteria 1')">Portería 1</button>
+                <button class="chip" data-planta="Zárate" data-porteria="Porteria 2"
+                    onclick="filtrarPorPorteria('Porteria 2')">Portería 2</button>
+            </div>
+            <div class="table-container">
+                <table id="vehiculos-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>DNI</th>
+                            <th>Entrada</th>
+                            <th>Apellido y Nombre</th>
+                            <th>Empresa</th>
+                            <th>Ingreso Remitos</th>
+                            <th>Patente</th>
+                            <th>Planta</th>
+                            <th>Portería</th>
+                            <th>Egreso Remitos</th>
+                            <th>Salida</th>
+                            <th>Registrar Remitos</th>
+                            <th>Registrar Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="13">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ───────────── CONFIG & STATE ───────────── */
+        // Endpoints n8n
+        const LIST_URL = 'https://ramaravachino.xyz/webhook/vehiculos-pendientes';
+        const CREATE_URL = 'https://ramaravachino.xyz/webhook/vehiculos-registrar';
+        const UPDATE_URL = 'https://ramaravachino.xyz/webhook/vehiculos-actualizar';
+
+        let plantaSeleccionada = 'Zárate';   // filtro inicial
+        let porteriaSeleccionada = null;       // filtro inicial
+        let fpEntrada = null;
+        let tabActual = 'registro';
+
+        /* ───────────── HELPERS ───────────── */
+        const qs = s => document.querySelector(s);
+        const qsa = s => document.querySelectorAll(s);
+
+        function formatDateDisplay(str) {
+            if (!str) return '';
+            const d = new Date(str); if (isNaN(d)) return '';
+            d.setHours(d.getHours() - 3);
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()} `;
+        }
+
+        /* ───────────── FUNCIÓN CAMBIAR TAB ───────────── */
+        function cambiarTab(tab) {
+            tabActual = tab;
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'registro') {
+                document.querySelectorAll('.nav-tabs button')[0].classList.add('active');
+                document.getElementById('tab-registro').classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-tabs button')[1].classList.add('active');
+                document.getElementById('tab-pendientes').classList.add('active');
+                cargarVehiculosPendientes();
+            }
+        }
+
+        /* ───────────── DOMContentLoaded ───────────── */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Flatpickr en input de entrada
+            if (flatpickr?.l10ns?.es) flatpickr.localize(flatpickr.l10ns.es);
+            fpEntrada = flatpickr('#entrada', {
+                enableTime: true,
+                dateFormat: 'Y-m-d H:i',
+                time_24hr: true,
+                locale: 'es',
+                defaultDate: new Date()
+            });
+
+            // Botón "Ahora"
+            qs('#set-now').addEventListener('click', () => {
+                try { fpEntrada?.setDate(new Date(), true); } catch {
+                    const d = new Date(); const yyyy = d.getFullYear(), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+                    const hh = String(d.getHours()).padStart(2, '0'), mi = String(d.getMinutes()).padStart(2, '0');
+                    qs('#entrada').value = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+                }
+            });
+
+            // Input hygiene
+            qs('#dni').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
+            qs('#pte_numero').addEventListener('input', e => e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+
+            // Autofocus al DNI
+            qs('#dni')?.focus();
+
+            // Resaltar botón Zárate al inicio (NO cargar tabla automáticamente)
+            resaltarBotonActivo('Zárate');
+
+            // -------- FORM SUBMIT --------
+            qs('#registroForm').addEventListener('submit', async e => {
+                e.preventDefault();
+
+                const btn = qs('.boton-registrar');
+                btn.disabled = true;
+                btn.textContent = 'Registrando…';
+
+                const fd = new FormData(e.target);
+                const planta = fd.get('planta');
+                const porteria = fd.get('porteria');
+
+                if (!planta || !porteria) {
+                    qs('#mensajeError').textContent = '⚠ Selecciona planta y portería.';
+                    btn.disabled = false; btn.textContent = 'Registrar';
+                    return;
+                }
+
+                try {
+                    // POST a n8n (registrar)
+                    await fetch(CREATE_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams(fd).toString()
+                    });
+
+                    qs('#mensajeExito').textContent = '✅ Registro guardado correctamente.';
+                    qs('#mensajeError').textContent = '';
+                    e.target.reset();
+                    qs('#planta').value = plantaSeleccionada;
+                    fpEntrada?.setDate(new Date(), true);
+                    qs('#dni')?.focus();
+
+                    // Solo actualizar si estamos en la pestaña de pendientes
+                    if (tabActual === 'pendientes') {
+                        await cargarVehiculosPendientes();
+                    }
+                } catch (err) {
+                    console.error(err);
+                    qs('#mensajeError').textContent = '❌ Error al registrar.';
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Registrar';
+                    setTimeout(() => { qs('#mensajeExito').textContent = ''; }, 8000);
+                }
+            });
+
+            // URL del Apps Script publicado
+            const AUTOCOMPLETE_URL = "https://script.google.com/macros/s/AKfycbxZlgN9LeZgrZP_BZM0UMKlANQPNtfTFh-cPuM0arTEpOWXNpfRQf_gryGnje1qFoKz0g/exec";
+
+            // -------- AUTOCOMPLETAR DNI --------
+            qs('#boton-dni').addEventListener('click', () => {
+                const dni = qs('#dni').value.trim();
+                if (!dni) return alert('⚠ Ingresa un DNI.');
+
+                // Mientras busca, muestro feedback
+                ['apellido_nombre', 'empresa', 'pte_numero'].forEach(id => qs('#' + id).value = 'Buscando…');
+
+                fetch(`${AUTOCOMPLETE_URL}?tipo=vehiculos&dni=${encodeURIComponent(dni)}&planta=${encodeURIComponent(plantaSeleccionada)}`)
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.error) {
+                            alert(d.error);
+                            ['apellido_nombre', 'empresa', 'pte_numero'].forEach(id => qs('#' + id).value = '');
+                            return;
+                        }
+                        qs('#apellido_nombre').value = d.apellido_nombre || '';
+                        qs('#empresa').value = d.empresa || '';
+                        qs('#pte_numero').value = (d.patente || '').toUpperCase();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('❌ Error al buscar DNI.');
+                    });
+            });
+
+        });
+
+        /* ───────────── TABLA PENDIENTES ───────────── */
+        // Función corregida para cargar vehículos pendientes
+        async function cargarVehiculosPendientes() {
+            const btnRefresh = document.querySelector('#btn-refresh');
+            const spin = qs('#cargando'), tbody = qs('#vehiculos-table tbody');
+            if (btnRefresh) { btnRefresh.disabled = true; btnRefresh.textContent = 'Actualizando…'; }
+            spin.style.display = 'block';
+            tbody.innerHTML = '';
+
+            try {
+                const url = `${LIST_URL}?planta=${encodeURIComponent(plantaSeleccionada)}${porteriaSeleccionada ? `&porteria=${encodeURIComponent(porteriaSeleccionada)}` : ''}`;
+                const resp = await fetch(url);
+                const data = await resp.json();
+
+                // DEBUG: Verificar datos recibidos
+                console.log('Respuesta del servidor:', data);
+
+                // Normalizo: n8n puede responder [] o {autocomplete:false, data:[...]}
+                const lista = Array.isArray(data) ? data : (data.data || []);
+
+                // DEBUG: Verificar lista procesada
+                console.log('Lista procesada:', lista);
+
+                const rows = lista.filter(v => {
+                    const okPlanta = v.planta === plantaSeleccionada;
+                    const okPorteria = !porteriaSeleccionada || v.porteria === porteriaSeleccionada;
+                    return okPlanta && okPorteria;
+                });
+
+                if (!rows.length) {
+                    tbody.innerHTML = `<tr><td colspan="13">No hay registros para ${plantaSeleccionada}${porteriaSeleccionada ? ' / ' + porteriaSeleccionada : ''}.</td></tr>`;
+                } else {
+                    rows.forEach(v => {
+                        // DEBUG: Verificar cada registro
+                        console.log('Procesando registro:', v);
+
+                        const tr = document.createElement('tr');
+                        const pendiente = !(v.egreso_remitos && v.salida);
+                        if (pendiente) tr.classList.add('pendiente');
+
+                        tr.innerHTML = `
+          <td>${v.id || 'N/A'}</td>
+          <td>${v.dni || ''}</td>
+          <td>${formatDateDisplay(v.entrada)}</td>
+          <td>${v.apellido_nombre || ''}</td>
+          <td>${v.empresa || ''}</td>
+          <td>${v.ingreso_remitos || ''}</td>
+          <td>${String(v.patente || '').toUpperCase()}</td>
+          <td>${v.planta || 'Sin planta'}</td>
+          <td>${v.porteria || 'Sin portería'}</td>
+          <td>${v.egreso_remitos || ''}</td>
+          <td>${formatDateDisplay(v.salida)}</td>
+        `;
+
+                        // --- Registrar Remitos ---
+                        const tdRem = document.createElement('td');
+                        if (v.egreso_remitos && v.egreso_remitos.trim() !== '') {
+                            tdRem.innerHTML = `<span style="color:var(--ok);font-weight:600;">✔ Completado</span>`;
+                        } else {
+                            tdRem.innerHTML = `
+            <input type="text" id="egreso_remitos_${v.id}" placeholder="Nuevo remito"><br>
+            <button onclick="registrarEgresoRemitos('${v.id}')">Registrar</button>
+            <div id="loading_remito_${v.id}" style="margin-top:5px;font-size:13px;"></div>`;
+                        }
+                        tr.appendChild(tdRem);
+
+                        // --- Registrar Salida --- (CORREGIDO)
+                        const tdSal = document.createElement('td');
+                        if (v.salida && v.salida.trim() !== '') {
+                            tdSal.innerHTML = `<span style="color:var(--ok);font-weight:600;">✔ Completado</span>`;
+                        } else {
+                            tdSal.innerHTML = `
+            <input type="datetime-local" id="salida_${v.id}"><br>
+            <button onclick="registrarSalida('${v.id}')">Registrar</button>
+            <div id="loading_salida_${v.id}" style="margin-top:5px;font-size:13px;"></div>`;
+                        }
+                        tr.appendChild(tdSal);
+
+                        tbody.appendChild(tr);
+                    });
+
+                    /* flatpickr a nuevos datetime-local */
+                    qsa("input[type='datetime-local']").forEach(el => {
+                        if (!el._flatpickr) {
+                            flatpickr(el, { enableTime: true, dateFormat: 'Y-m-d H:i', time_24hr: true, locale: 'es', defaultDate: new Date() });
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Error al cargar datos:', err);
+                tbody.innerHTML = '<tr><td colspan="13">Error al cargar datos.</td></tr>';
+            } finally {
+                spin.style.display = 'none';
+                if (btnRefresh) { btnRefresh.disabled = false; btnRefresh.textContent = '🔄 Actualizar'; }
+            }
+        }
+
+        /* ───────────── ACTUALIZAR REGISTROS ───────────── */
+        function actualizarRegistroVehiculo(id, rem = '', salida = '') {
+            const ps = new URLSearchParams({ id });
+
+            if (rem) ps.append('egreso_remitos', rem);
+            if (salida) ps.append('salida', salida);
+
+            // 👉 Enviar la planta (y portería) al webhook
+            ps.append('planta', plantaSeleccionada || 'Zárate');
+            if (porteriaSeleccionada) ps.append('porteria', porteriaSeleccionada);
+
+            return fetch(UPDATE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: ps.toString(),
+            })
+                .then(r => {
+                    if (!r.ok) throw new Error(` HTTP ${r.status}`);
+                    return r.json();
+                })
+                .then(() => cargarVehiculosPendientes())
+                .catch(err => {
+                    console.error('Error en actualización:', err);
+                    alert('❌ Error al actualizar el registro: ' + err.message);
+                    throw err;
+                });
+        }
+
+        function registrarEgresoRemitos(id) {
+            const inp = qs(`#egreso_remitos_${id}`),
+                ld = qs(`#loading_remito_${id}`);
+
+            if (!inp.value.trim()) return alert('⚠ Ingresa un remito.');
+
+            ld.textContent = '⏳ Actualizando...';
+            ld.style.color = '#666';
+
+            actualizarRegistroVehiculo(id, inp.value.trim(), '')
+                .then(() => {
+                    ld.textContent = '✅ Actualizado';
+                    ld.style.color = 'var(--ok)';
+                    setTimeout(() => ld.textContent = '', 3000);
+                })
+                .catch(() => {
+                    ld.textContent = '❌ Error';
+                    ld.style.color = '#b00020';
+                });
+        }
+
+        function registrarSalida(id) {
+            const inp = qs(`#salida_${id}`),
+                ld = qs(`#loading_salida_${id}`);
+
+            if (!inp.value.trim()) return alert('⚠ Ingresa fecha.');
+
+            ld.textContent = '⏳ Actualizando...';
+            ld.style.color = '#666';
+
+            actualizarRegistroVehiculo(id, '', inp.value.trim())
+                .then(() => {
+                    ld.textContent = '✅ Actualizado';
+                    ld.style.color = 'var(--ok)';
+                    setTimeout(() => ld.textContent = '', 3000);
+                })
+                .catch(() => {
+                    ld.textContent = '❌ Error';
+                    ld.style.color = '#b00020';
+                });
+        }
+
+        /* ───────────── FILTROS & UI ───────────── */
+        function resaltarBotonActivo(planta, porteria = null) {
+            qsa('.filters .chip').forEach(b => {
+                const bp = b.getAttribute('data-planta');
+                const bo = b.getAttribute('data-porteria');
+                b.classList.remove('activo');
+                if (porteria !== null) {
+                    if (bp === 'Zárate' && bo === porteria) b.classList.add('activo');
+                } else {
+                    if (bp === planta && (bo === "" || bo === null)) b.classList.add('activo');
+                }
+            });
+        }
+
+        function filtrarPorPlanta(pl) {
+            plantaSeleccionada = pl;
+            porteriaSeleccionada = null;
+            resaltarBotonActivo(pl);
+            cargarVehiculosPendientes();
+        }
+
+        function filtrarPorPorteria(po) {
+            plantaSeleccionada = 'Zárate';
+            porteriaSeleccionada = po;
+            resaltarBotonActivo('Zárate', po);
+            cargarVehiculosPendientes();
+        }
+
+        // Hacer la función global
+        window.cambiarTab = cambiarTab;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Administrativos — Zárate</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        :root {
+            --brand: #1a3b5d;
+            --brand-2: #0d6efd;
+            --ok: #2e7d32;
+            --card: #fff;
+            --shadow: 0 10px 28px rgba(16, 24, 40, .08);
+            --error: #dc3545;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #f9fbff 0, #eef3ff 100%);
+            margin: 0;
+            color: #1f2937;
+            padding: 16px;
+            font-size: 17px;
+        }
+
+        button,
+        input,
+        select {
+            font-size: 17px
+        }
+
+        a,
+        button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation
+        }
+
+        .topbar {
+            max-width: 900px;
+            margin: 0 auto 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #e8f0ff;
+            color: #0b4fd4;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-nuevo {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--brand-2);
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nuevo:hover {
+            background: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(13, 110, 253, 0.5);
+        }
+
+        .btn-nuevo:active {
+            transform: translateY(0);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto 14px;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px 16px 8px;
+            border-left: 6px solid var(--ok);
+        }
+
+        .form-title {
+            margin: 0 0 12px;
+            color: var(--brand);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        @media (orientation:landscape) and (min-width:900px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        .form-section label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d0d7e2;
+            border-radius: 12px;
+            background: #fbfcff;
+            min-height: 44px;
+        }
+
+        .input-contenedor {
+            position: relative;
+        }
+
+        .input-contenedor button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            width: 44px;
+            border: none;
+            border-radius: 10px;
+            background: #e6ecff;
+            color: #123a8c;
+            cursor: pointer;
+        }
+
+        .boton-registrar {
+            grid-column: 1/-1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--ok);
+            color: #fff;
+            font-weight: 700;
+            min-height: 48px;
+            position: sticky;
+            bottom: 8px;
+            z-index: 5;
+        }
+
+        .boton-registrar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .mensaje {
+            font-weight: 700;
+            margin-top: 6px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .mensaje.exito {
+            color: #2e7d32;
+            background: #e8f5e8;
+        }
+
+        .mensaje.error {
+            color: #b00020;
+            background: #fdeaea;
+        }
+
+        #patente {
+            text-transform: uppercase;
+        }
+
+        /* Estilos para tabla de pendientes */
+        .container-full {
+            max-width: 1120px;
+            margin: 14px auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+        }
+
+        .table-title {
+            margin: 0 0 12px;
+            color: var(--brand);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0 12px;
+        }
+
+        .filters .chip {
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #d0d7e2;
+            background: #f7f9ff;
+            cursor: pointer;
+            font-weight: 600;
+            min-height: 44px;
+        }
+
+        .filters .chip.activo {
+            background: var(--brand-2);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0 12px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online {
+            background: #2e7d32;
+        }
+
+        .status-dot.offline {
+            background: #dc3545;
+        }
+
+        .status-dot.loading {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.5
+            }
+        }
+
+        .table-container {
+            overflow: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #f2f6ff;
+            z-index: 1;
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid #dbe2ef;
+        }
+
+        tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #eef2f7;
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafcff
+        }
+
+        tr.pendiente {
+            background: #fff7e6
+        }
+
+        .table-container input[type="datetime-local"] {
+            width: 95%;
+            padding: 8px 10px;
+            border: 1px solid #d0d7e2;
+            border-radius: 10px;
+            background: #fff;
+            min-height: 40px;
+        }
+
+        .table-container button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 10px;
+            background: #0b7a3a;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            min-height: 40px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .nav-tabs button {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs button.active {
+            color: var(--brand-2);
+            border-bottom-color: var(--brand-2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="topbar">
+        <h2 class="form-title">Control de Administrativos</h2>
+        <span class="badge"><i class="fa-solid fa-industry"></i> Zárate</span>
+    </div>
+
+    <!-- BOTÓN NUEVO REGISTRO -->
+    <button class="btn-nuevo" onclick="nuevoRegistro()" title="Limpiar formulario para nuevo registro">
+        <i class="fa-solid fa-plus"></i> Nuevo Registro
+    </button>
+
+    <div class="nav-tabs">
+        <button class="active" onclick="cambiarTab('registro')">📝 Registrar Entrada</button>
+        <button onclick="cambiarTab('pendientes')">📋 Pendientes de Salida</button>
+    </div>
+    <!-- TAB: REGISTRO -->
+    <div id="tab-registro" class="tab-content active">
+        <div class="container">
+            <form id="formAdmin">
+                <input type="hidden" name="planta" value="Zárate" />
+
+                <div class="form-grid">
+                    <div class="form-section">
+                        <label>Planta</label>
+                        <input type="text" value="Zárate" readonly style="background:#f5f5f5;">
+                    </div>
+
+                    <div class="form-section">
+                        <label for="porteria">Portería</label>
+                        <select id="porteria" name="porteria" required>
+                            <option value="Porteria 1">Portería 1</option>
+                            <option value="Porteria 2">Portería 2</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section">
+                        <label for="entrada_admin">Entrada</label>
+                        <div class="input-contenedor">
+                            <input type="datetime-local" id="entrada_admin" name="entrada_admin" required />
+                            <button type="button" id="btnNow" title="Ahora"><i class="fa-regular fa-clock"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label for="vehiculo">Vehículo</label>
+                        <select id="vehiculo" name="vehiculo" required>
+                            <option value="Auto">Auto</option>
+                            <option value="Camioneta">Camioneta</option>
+                            <option value="Camion">Camion</option>
+                        </select>
+                    </div>
+
+                    <div class="form-section">
+                        <label for="patente">Patente</label>
+                        <input type="text" id="patente" name="patente" required placeholder="AAA123 o AA123BB" />
+                    </div>
+
+                    <div class="form-section">
+                        <label for="apellido_nombre_admin">Apellido y Nombre</label>
+                        <div class="input-contenedor">
+                            <input type="text" id="apellido_nombre_admin" name="apellido_nombre_admin" required />
+                            <button type="button" id="btnBuscarNombre" title="Buscar"><i
+                                    class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <label for="observaciones">Observaciones</label>
+                        <input type="text" id="observaciones" name="observaciones" placeholder="Opcional" />
+                    </div>
+
+                    <button type="submit" class="boton-registrar" id="btnGuardar">Registrar</button>
+                    <div id="mensajesRegistro"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB: PENDIENTES -->
+    <div id="tab-pendientes" class="tab-content">
+        <div class="container-full">
+            <div class="status-indicator">
+                <div class="status-dot" id="connectionStatus"></div>
+                <span id="connectionText">Verificando conexión...</span>
+            </div>
+
+            <div id="mensajesPendientes"></div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <h3 class="table-title" style="margin:0;">Pendientes</h3>
+                <div id="cargando">🔄 Cargando registros...</div>
+            </div>
+
+            <div class="filters" role="group" aria-label="Filtros de portería">
+                <button class="chip activo" data-porteria="" onclick="filtrarPorPorteria('')">Todas</button>
+                <button class="chip" data-porteria="Porteria 1" onclick="filtrarPorPorteria('Porteria 1')">Portería
+                    1</button>
+                <button class="chip" data-porteria="Porteria 2" onclick="filtrarPorPorteria('Porteria 2')">Portería
+                    2</button>
+            </div>
+
+            <div class="table-container">
+                <table id="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Entrada</th>
+                            <th>Vehículo</th>
+                            <th>Patente</th>
+                            <th>Apellido y Nombre</th>
+                            <th>Observaciones</th>
+                            <th>Portería</th>
+                            <th>Salida</th>
+                            <th>Registrar Salida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="9">Verificando conexión...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL del Apps Script (reemplazar con tu URL de despliegue)
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyfcW9g8xdO6b7Tg1cj-qwuqo62Y4dIhYy93I6RsndsUE-okooEf6ornxJbqYr5k8vcgg/exec';
+
+        // URLs de webhooks n8n
+        const N8N_WEBHOOK_REGISTRAR = 'https://ramaravachino.xyz/webhook/admin-registrar';
+        const N8N_WEBHOOK_ACTUALIZAR = 'https://ramaravachino.xyz/webhook/admin-actualizar'; // ← ACTUALIZADO
+
+        const PLANTA_FIJA = 'Zárate';
+
+        let datos = [];
+        let filtroPorteria = '';
+        let tabActual = 'registro';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setNow();
+            document.getElementById('btnNow').addEventListener('click', setNow);
+
+            document.getElementById('patente').addEventListener('input', e => {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            });
+
+            document.getElementById('formAdmin').addEventListener('submit', onSubmit);
+            document.getElementById('btnBuscarNombre').addEventListener('click', buscarPorNombre);
+        });
+
+        // ========== FUNCIONES GENERALES ==========
+        function cambiarTab(tab) {
+            tabActual = tab;
+            document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'registro') {
+                document.querySelectorAll('.nav-tabs button')[0].classList.add('active');
+                document.getElementById('tab-registro').classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-tabs button')[1].classList.add('active');
+                document.getElementById('tab-pendientes').classList.add('active');
+                verificarConexion().then(cargarAdministrativos);
+            }
+        }
+
+        function setNow() {
+            const d = new Date();
+            const yyyy = d.getFullYear(), mm = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0'), mi = String(d.getMinutes()).padStart(2, '0');
+            document.getElementById('entrada_admin').value = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+        }
+
+        function showMsgRegistro(html, ok = true) {
+            const c = document.getElementById('mensajesRegistro');
+            c.innerHTML = `<div class="mensaje ${ok ? 'exito' : 'error'}">${html}</div>`;
+            setTimeout(() => c.innerHTML = '', ok ? 3000 : 5000);
+        }
+
+        function showMsgPendientes(html, ok = true) {
+            const c = document.getElementById('mensajesPendientes');
+            c.innerHTML = `<div class="mensaje ${ok ? 'exito' : 'error'}">${html}</div>`;
+            setTimeout(() => c.innerHTML = '', ok ? 3000 : 5000);
+        }
+
+        // ========== REGISTRO (POST a n8n) ==========
+        async function onSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardar');
+            const form = e.target; // <-- Guardamos la referencia al formulario
+            btn.disabled = true;
+            btn.textContent = '⏳ Registrando...';
+
+            const fd = new FormData(form);
+            const data = Object.fromEntries(fd.entries());
+            data.tipo = 'admin';
+
+            try {
+                const res = await fetch(N8N_WEBHOOK_REGISTRAR, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(data).toString()
+                });
+                const txt = await res.text();
+                if (res.ok && txt.includes('✅')) {
+                    showMsgRegistro(txt, true);
+
+                    // --- CÓDIGO CORREGIDO ---
+                    // 1. Resetea todos los campos del formulario a sus valores por defecto.
+                    form.reset();
+
+                    // 2. Vuelve a establecer la fecha y hora actual en el campo de entrada.
+                    setNow();
+                    // --- FIN DE LA CORRECCIÓN ---
+
+                } else {
+                    showMsgRegistro(txt || '❌ Error al registrar.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showMsgRegistro('❌ Error de red al registrar.', false);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Registrar';
+            }
+        }
+        // ========== LIMPIAR FORMULARIO PARA NUEVO REGISTRO ==========
+        function nuevoRegistro() {
+            // Cambiar a la pestaña de registro si no está activa
+            if (tabActual !== 'registro') {
+                cambiarTab('registro');
+            }
+
+            // Limpiar todos los campos
+            document.getElementById('patente').value = '';
+            document.getElementById('apellido_nombre_admin').value = '';
+            document.getElementById('observaciones').value = '';
+
+            // Restablecer selectores a primera opción
+            document.getElementById('porteria').value = 'Porteria 1';
+            document.getElementById('vehiculo').value = 'Auto';
+
+            // Actualizar fecha/hora a ahora
+            setNow();
+
+            // Limpiar mensajes si hay alguno
+            document.getElementById('mensajesRegistro').innerHTML = '';
+
+            // Enfocar en el primer campo editable
+            document.getElementById('entrada_admin').focus();
+
+            // Mostrar feedback visual
+            showMsgRegistro('📝 Formulario listo para nuevo registro', true);
+        }
+        // ========== BÚSQUEDA POR NOMBRE (GET a Apps Script) ==========
+        async function buscarPorNombre() {
+            const nom = document.getElementById('apellido_nombre_admin').value.trim();
+            if (!nom) return alert('⚠️ Ingresá Apellido y Nombre.');
+            const pat = document.getElementById('patente');
+            try {
+                pat.value = 'Buscando...';
+                pat.disabled = true;
+                const url = `${APPS_SCRIPT_URL}?tipo=buscar_nombre&planta=${encodeURIComponent(PLANTA_FIJA)}&apellido_nombre=${encodeURIComponent(nom)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.error) {
+                    alert(data.error);
+                    pat.value = '';
+                } else {
+                    pat.value = (data.patente || '').toUpperCase();
+                    if (data.apellido_nombre) {
+                        document.getElementById('apellido_nombre_admin').value = data.apellido_nombre;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Error al buscar.');
+                pat.value = '';
+            } finally {
+                pat.disabled = false;
+            }
+        }
+
+        // ========== PENDIENTES (GET desde Apps Script) ==========
+        function updateConnectionStatus(status, text) {
+            const dot = document.getElementById('connectionStatus');
+            const label = document.getElementById('connectionText');
+            if (dot) dot.className = `status-dot ${status}`;
+            if (label) label.textContent = text;
+        }
+
+        async function verificarConexion() {
+            updateConnectionStatus('loading', 'Verificando conexión...');
+            try {
+                const res = await fetch(`${APPS_SCRIPT_URL}?tipo=pendientes&planta=${encodeURIComponent(PLANTA_FIJA)}&test=1`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                updateConnectionStatus('online', 'Conectado');
+            } catch (e) {
+                updateConnectionStatus('offline', 'Sin conexión');
+            }
+        }
+
+        function setNowLocalValue() {
+            const now = new Date();
+            const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                .toISOString().slice(0, 16);
+            return local;
+        }
+
+        function formatearFecha(str) {
+            if (!str) return '';
+            const d = new Date(str);
+            if (isNaN(d)) return str;
+            return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function cargarAdministrativos() {
+            const spin = document.getElementById('cargando');
+            const tbody = document.querySelector('#admin-table tbody');
+            spin.textContent = '🔄 Cargando registros...';
+            tbody.innerHTML = '';
+
+            try {
+                const url = `${APPS_SCRIPT_URL}?tipo=pendientes&planta=${encodeURIComponent(PLANTA_FIJA)}${filtroPorteria ? `&porteria=${encodeURIComponent(filtroPorteria)}` : ''}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                datos = Array.isArray(data) ? data : [];
+
+                if (!datos.length) {
+                    tbody.innerHTML = `<tr><td colspan="9">No hay administrativos pendientes${filtroPorteria ? ` en ${filtroPorteria}` : ''}.</td></tr>`;
+                    spin.textContent = '📋 0 registros';
+                    return;
+                }
+
+                spin.textContent = `📋 ${datos.length} registros`;
+                renderTabla(datos);
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="9">❌ Error al cargar datos</td></tr>`;
+                spin.textContent = '❌ Error';
+                updateConnectionStatus('offline', 'Error al cargar');
+            }
+        }
+
+        function renderTabla(items) {
+            const tbody = document.querySelector('#admin-table tbody');
+            tbody.innerHTML = '';
+
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                tr.className = 'pendiente';
+                tr.innerHTML = `
+          <td>${it.id || ''}</td>
+          <td>${formatearFecha(it.entrada)}</td>
+          <td>${it.vehiculo || ''}</td>
+          <td>${String(it.patente || '').toUpperCase()}</td>
+          <td>${it.apellido_nombre || ''}</td>
+          <td>${it.observaciones || ''}</td>
+          <td>${it.porteria || ''}</td>
+          <td>${it.salida ? formatearFecha(it.salida) : ''}</td>
+          <td>
+            <input type="datetime-local" id="salida_${it.id}" value="${setNowLocalValue()}" />
+            <button onclick="registrarSalida(${it.id}, this)">Registrar</button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ========== REGISTRAR SALIDA (POST a n8n) ==========
+        async function registrarSalida(id, btn) {
+            const input = document.getElementById(`salida_${id}`);
+            if (!input || !input.value) { alert('Seleccioná fecha/hora de salida'); return; }
+            const salida = input.value;
+
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Registrando...';
+
+            const body = new URLSearchParams({
+                tipo: 'admin',
+                id: String(id),
+                salida: salida.replace('T', ' '),
+                planta: PLANTA_FIJA
+            });
+
+            try {
+                const res = await fetch(N8N_WEBHOOK_ACTUALIZAR, { // ← USA LA URL CORRECTA
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body
+                });
+                const txt = await res.text();
+                if (res.ok && txt.includes('✅')) {
+                    showMsgPendientes('✅ Salida registrada', true);
+                    updateConnectionStatus('online', 'Salida registrada');
+                    cargarAdministrativos();
+                } else {
+                    showMsgPendientes(`Error al registrar: ${txt}`, false);
+                }
+            } catch (e) {
+                console.error(e);
+                showMsgPendientes(`Error de red: ${e.message}`, false);
+                updateConnectionStatus('offline', 'Error al registrar');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function filtrarPorPorteria(p) {
+            filtroPorteria = p || '';
+            document.querySelectorAll('.filters .chip').forEach(c => c.classList.toggle('activo', (c.dataset.porteria || '') === filtroPorteria));
+            cargarAdministrativos();
+        }
+
+        window.cambiarTab = cambiarTab;
+        window.filtrarPorPorteria = filtrarPorPorteria;
+        window.registrarSalida = registrarSalida;
+        window.nuevoRegistro = nuevoRegistro;
+    </script>
+</body>
+
+</html>
