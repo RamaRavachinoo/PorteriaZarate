@@ -4,8 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Panel Inicial — Control de Ingreso/Egreso</title>
+    <title>Sistema Unificado de Portería — Zárate</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+
     <style>
         :root {
             --brand: #1a3b5d;
@@ -13,10 +18,13 @@
             --ok: #2e7d32;
             --card: #fff;
             --shadow: 0 10px 28px rgba(16, 24, 40, .08);
+            --error: #dc3545;
+            --bg-master: #111827;
+            /* Fondo del menú principal */
         }
 
         * {
-            box-sizing: border-box
+            box-sizing: border-box;
         }
 
         body {
@@ -24,86 +32,1873 @@
             background: linear-gradient(180deg, #f9fbff 0, #eef3ff 100%);
             margin: 0;
             color: #1f2937;
-            padding: 16px;
-            font-size: 17px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+            padding-top: 70px;
+            /* Espacio para el menú fijo */
+            font-size: 16px;
         }
 
-        h1 {
-            color: var(--brand);
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .button-grid {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: 1fr;
+        /* === MASTER NAVIGATION === */
+        .master-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
+            background: var(--brand);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            padding: 0 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        @media(min-width:700px) {
-            .button-grid {
-                grid-template-columns: 1fr 1fr 1fr;
-                max-width: 900px;
+        .master-tabs {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        .master-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .master-btn:hover {
+            color: #fff;
+        }
+
+        .master-btn.active {
+            color: #fff;
+            border-bottom-color: var(--brand-2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .master-btn i {
+            margin-right: 8px;
+        }
+
+        /* Módulos (Secciones) */
+        .module-section {
+            display: none;
+            padding: 16px;
+            animation: fadeIn 0.3s;
+        }
+
+        .module-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        .main-btn {
+        /* ESTILOS COMUNES DE LAS APPS ORIGINALES */
+        button,
+        input,
+        select {
+            font-size: 16px;
+        }
+
+        a,
+        button {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .topbar {
+            max-width: 1200px;
+            margin: 0 auto 14px;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 30px 20px;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #e8f0ff;
+            color: #0b4fd4;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            font-size: 14px;
+        }
+
+        /* Contenedores */
+        .container {
+            max-width: 900px;
+            margin: 0 auto 14px;
             background: var(--card);
             border-radius: 16px;
             box-shadow: var(--shadow);
-            border-left: 6px solid var(--brand-2);
-            color: var(--brand);
-            font-weight: 700;
-            font-size: 18px;
+            padding: 16px 16px 8px;
+            border-left: 6px solid var(--ok);
+        }
+
+        .container-full {
+            max-width: 100%;
+            margin: 14px auto;
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        /* Formularios */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        @media (min-width:768px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .form-section label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #334155;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-section input,
+        .form-section select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d0d7e2;
+            border-radius: 12px;
+            background: #fbfcff;
+            min-height: 44px;
+        }
+
+        .input-contenedor {
+            position: relative;
+        }
+
+        .input-contenedor button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 36px;
+            width: 40px;
+            border: none;
+            border-radius: 8px;
+            background: #e6ecff;
+            color: #123a8c;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-            text-decoration: none;
         }
 
-        .main-btn i {
-            font-size: 40px;
-            margin-bottom: 12px;
+        .boton-registrar {
+            grid-column: 1/-1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--ok);
+            color: #fff;
+            font-weight: 700;
+            min-height: 48px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .boton-registrar:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Mensajes */
+        .mensaje {
+            font-weight: 700;
+            margin-top: 6px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .mensaje.exito {
+            color: #2e7d32;
+            background: #e8f5e8;
+        }
+
+        .mensaje.error {
+            color: #b00020;
+            background: #fdeaea;
+        }
+
+        /* Tabs Internas */
+        .nav-tabs {
+            max-width: 1200px;
+            margin: 0 auto 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .nav-tabs button {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs button.active {
             color: var(--brand-2);
+            border-bottom-color: var(--brand-2);
         }
 
-        .main-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 14px 32px rgba(16, 24, 40, .12);
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==========================================
+           TABLAS - DISEÑO PREMIUM MODERNO
+           ========================================== */
+        .table-container {
+            overflow: auto;
+            border-radius: 16px;
+            margin-top: 14px;
+            background: #fff;
+            box-shadow: 0 4px 24px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+        }
+
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 13px;
+            min-width: 900px;
+        }
+
+        /* Encabezados Premium */
+        thead th {
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #1a3b5d 0%, #0d4a8c 100%);
+            color: #fff;
+            z-index: 2;
+            text-align: center;
+            padding: 14px 12px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+
+        thead th:first-child {
+            border-radius: 14px 0 0 0;
+        }
+
+        thead th:last-child {
+            border-radius: 0 14px 0 0;
+        }
+
+        /* Filas del cuerpo */
+        tbody td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            text-align: center;
+            vertical-align: middle;
+            transition: all 0.2s ease;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(90deg, #eef4ff 0%, #f0f7ff 100%);
+            transform: scale(1.002);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
+        }
+
+        tr.pendiente {
+            background: linear-gradient(90deg, #fef3c7 0%, #fef9c3 100%);
+            border-left: 4px solid #f59e0b;
+        }
+
+        tr.pendiente:hover {
+            background: linear-gradient(90deg, #fde68a 0%, #fef08a 100%);
+        }
+
+        /* Última fila sin borde */
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ==========================================
+           BADGES DE ESTADO MODERNOS
+           ========================================== */
+        .estado-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .estado-badge.completo {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #047857;
+            box-shadow: 0 2px 6px rgba(4, 120, 87, 0.15);
+        }
+
+        .estado-badge.completo::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse-green 2s infinite;
+        }
+
+        .estado-badge.pendiente {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #b45309;
+            box-shadow: 0 2px 6px rgba(180, 83, 9, 0.15);
+        }
+
+        .estado-badge.pendiente::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f59e0b;
+            animation: pulse-orange 2s infinite;
+        }
+
+        .estado-badge.vacio {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes pulse-orange {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+
+        /* ==========================================
+           BOTONES DE ACCIÓN EN TABLA
+           ========================================== */
+        .btn-tabla {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-width: 80px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-tabla:active {
+            transform: scale(0.96);
+        }
+
+        /* Botón Ingreso - Azul vibrante */
+        .btn-tabla.ingreso {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-tabla.ingreso:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* Botón Egreso - Verde esmeralda */
+        .btn-tabla.egreso {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
+        }
+
+        .btn-tabla.egreso:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* Botón Remito - Naranja cálido */
+        .btn-tabla.remito {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);
+        }
+
+        .btn-tabla.remito:hover {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            box-shadow: 0 6px 16px rgba(234, 88, 12, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* Botón Bulto - Púrpura moderno */
+        .btn-tabla.bulto {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+        }
+
+        .btn-tabla.bulto:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            box-shadow: 0 6px 16px rgba(124, 58, 237, 0.45);
+            transform: translateY(-2px);
+        }
+
+        /* Botón Secundario/Outline */
+        .btn-tabla.outline {
+            background: #fff;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            box-shadow: none;
+        }
+
+        .btn-tabla.outline:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+
+        /* Grupo de botones en celda */
+        .btn-group-tabla {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ==========================================
+           INPUTS EN TABLA (Fechas, etc.)
+           ========================================== */
+        .input-tabla {
+            padding: 8px 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #fff;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+
+        .input-tabla:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* ==========================================
+           ESTILOS DE CELDAS ESPECIALES
+           ========================================== */
+        .celda-id {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .celda-transporte {
+            font-weight: 600;
+            color: #1e293b;
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .celda-patente {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-weight: 700;
+            color: #0f172a;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            letter-spacing: 1px;
+        }
+
+        .celda-porteria {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: #f0f9ff;
+            color: #0369a1;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .celda-fecha {
+            color: #475569;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        /* ==========================================
+           TABLA RESPONSIVA
+           ========================================== */
+        @media (max-width: 768px) {
+            .table-container {
+                border-radius: 12px;
+            }
+
+            thead th,
+            tbody td {
+                padding: 10px 8px;
+                font-size: 11px;
+            }
+
+            .btn-tabla {
+                padding: 6px 10px;
+                font-size: 10px;
+                min-width: 60px;
+            }
+
+            .btn-group-tabla {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+
+        /* ==========================================
+           HEADER DE TABLA PREMIUM
+           ========================================== */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .table-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .table-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-title i {
+            color: #3b82f6;
+        }
+
+        .counter-badge {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1d4ed8;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-refresh:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        }
+
+        .btn-refresh:active {
+            transform: scale(0.98);
+        }
+
+        .btn-refresh i {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-refresh:hover i {
+            transform: rotate(180deg);
+        }
+
+        /* ==========================================
+           BUSCADOR PREMIUM
+           ========================================== */
+        .search-box {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 48px 14px 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            color: #334155;
+            transition: all 0.25s ease;
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+            background: #fff;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #64748b;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+
+        .search-clear:hover {
+            background: #e2e8f0;
+            color: #374151;
+            opacity: 1;
+        }
+
+        /* ==========================================
+           PAGINACIÓN PREMIUM
+           ========================================== */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 14px;
+        }
+
+        .btn-pagination {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            color: #475569;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pagination:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .btn-pagination:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* ==========================================
+           FILTROS Y CHIPS MODERNOS
+           ========================================== */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0 16px;
+            align-items: center;
+        }
+
+        .filters .chip {
+            padding: 10px 18px;
+            border-radius: 50px;
+            border: 2px solid #e2e8f0;
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        }
+
+        .filters .chip:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .filters .chip.activo {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+
+        .filters .chip.activo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+        }
+
+        /* Chip de Actualizar especial */
+        .filters .chip-refresh {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: #fff !important;
+            border-color: transparent !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        .filters .chip-refresh:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+        }
+
+        /* Botón Flotante (Admin) */
+        .btn-nuevo-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--brand-2);
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+            cursor: pointer;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Utilidades */
+        .d-none {
+            display: none !important;
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+
+        /* Status Dot */
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-dot.online {
+            background: #2e7d32;
+        }
+
+        .status-dot.offline {
+            background: #dc3545;
+        }
+
+        .status-dot.loading {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            50% {
+                opacity: 0.5;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Control de Ingreso y Egreso - Zárate</h1>
+    <nav class="master-nav">
+        <div class="master-tabs">
+            <button class="master-btn active" onclick="switchModule('camiones')">
+                <i class="fa-solid fa-truck"></i> Camiones
+            </button>
+            <button class="master-btn" onclick="switchModule('vehiculos')">
+                <i class="fa-solid fa-car"></i> Vehículos
+            </button>
+            <button class="master-btn" onclick="switchModule('admin')">
+                <i class="fa-solid fa-user-tie"></i> Administrativos
+            </button>
+        </div>
+    </nav>
 
-    <div class="button-grid">
-        <a href="https://sites.google.com/softys.com/porteria/vehiculos?authuser=1" class="main-btn">
-            <i class="fa-solid fa-car"></i>
-            Vehículos
-        </a>
-        <a href="https://sites.google.com/softys.com/porteria/camiones-v3?authuser=1" class="main-btn">
-            <i class="fa-solid fa-truck"></i>
-            Camiones
-        </a>
-        <a href="https://sites.google.com/softys.com/porteria/administrativos-v2?authuser=1" class="main-btn">
-            <i class="fa-solid fa-user-tie"></i>
-            Administrativos
-        </a>
+    <div id="module-camiones" class="module-section active">
+        <div class="topbar">
+            <h2 style="color:var(--brand); margin:0;">Control de Camiones</h2>
+            <span class="badge"><i class="fa-solid fa-industry"></i> Zárate</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="active" onclick="cam_cambiarTab('registro')">🚛 Registrar Arribo</button>
+            <button onclick="cam_cambiarTab('pendientes')">📋 Pendientes</button>
+        </div>
+
+        <div id="cam-tab-registro" class="tab-content active">
+            <div class="container">
+                <form id="cam_form">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <label>Planta</label>
+                            <select name="planta" required>
+                                <option value="Zárate" selected>Zárate</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>Portería</label>
+                            <select name="porteria" required>
+                                <option value="Porteria 1">Portería 1</option>
+                                <option value="Porteria 2">Portería 2</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>Arribo</label>
+                            <div class="input-contenedor">
+                                <input type="datetime-local" id="cam_ingreso" name="ingreso" required />
+                                <button type="button" id="cam_btnNow"><i class="fa-regular fa-clock"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <label>DNI Chofer</label>
+                            <div class="input-contenedor">
+                                <input type="text" id="cam_dni" name="dni_chofer" required />
+                                <button type="button" id="cam_btnBuscarDni"><i
+                                        class="fa-solid fa-magnifying-glass"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section"><label>Chofer</label><input type="text" id="cam_chofer" name="chofer"
+                                required /></div>
+                        <div class="form-section"><label>Transporte</label><input type="text" id="cam_transporte"
+                                name="transporte" required /></div>
+                        <div class="form-section"><label>Tractor</label><input type="text" id="cam_tractor"
+                                name="tractor" class="uppercase" required /></div>
+                        <div class="form-section"><label>Semi</label><input type="text" id="cam_semi" name="semi"
+                                class="uppercase" required /></div>
+                        <div class="form-section"><label>Ingreso Remito</label><input type="text" name="ingreso_remito"
+                                required></div>
+                        <div class="form-section"><label>Ingreso Bulto</label><input type="text" name="ingreso_bulto_2"
+                                required></div>
+
+                        <button type="submit" class="boton-registrar" id="cam_btnGuardar">Registrar Camión</button>
+                        <div id="cam_mensajes" style="margin-top:10px;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="cam-tab-pendientes" class="tab-content">
+            <div class="container-full">
+                <!-- Header de la sección con título y contadores -->
+                <div class="table-header">
+                    <div class="table-header-left">
+                        <h3 class="table-title">
+                            <i class="fa-solid fa-truck"></i> Camiones Pendientes
+                        </h3>
+                        <span class="counter-badge" id="cam_counter">
+                            <span id="cam_total">0</span> registros
+                        </span>
+                    </div>
+                    <button class="btn-refresh" onclick="cam_cargar(false)">
+                        <i class="fa-solid fa-rotate"></i> Actualizar
+                    </button>
+                </div>
+
+                <!-- Filtros de portería -->
+                <div class="filters">
+                    <button class="chip activo" onclick="cam_filtrar('Zárate', '')">
+                        <i class="fa-solid fa-layer-group"></i> Zárate (Todas)
+                    </button>
+                    <button class="chip" onclick="cam_filtrar('Zárate', 'Porteria 1')">
+                        <i class="fa-solid fa-1"></i> Portería 1
+                    </button>
+                    <button class="chip" onclick="cam_filtrar('Zárate', 'Porteria 2')">
+                        <i class="fa-solid fa-2"></i> Portería 2
+                    </button>
+                </div>
+
+                <!-- Buscador mejorado -->
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="cam_buscar_texto"
+                        placeholder="Buscar por Chofer, Tractor, Semi o Transporte..." class="search-input">
+                    <button class="search-clear"
+                        onclick="document.getElementById('cam_buscar_texto').value=''; cam_filtro_text=''; cam_render();"
+                        title="Limpiar búsqueda">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table id="cam-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fa-solid fa-hashtag"></i> ID</th>
+                                <th><i class="fa-solid fa-user"></i> Chofer</th>
+                                <th><i class="fa-solid fa-truck-front"></i> Tractor</th>
+                                <th><i class="fa-solid fa-trailer"></i> Semi</th>
+                                <th><i class="fa-solid fa-clock"></i> Arribo</th>
+                                <th><i class="fa-solid fa-building"></i> Transporte</th>
+                                <th><i class="fa-solid fa-right-from-bracket"></i> Egreso</th>
+                                <th><i class="fa-solid fa-file-invoice"></i> Remitos</th>
+                                <th><i class="fa-solid fa-boxes-stacked"></i> Bultos</th>
+                                <th><i class="fa-solid fa-door-open"></i> Portería</th>
+                                <th><i class="fa-solid fa-right-to-bracket"></i> Reg. Ingreso</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación mejorada -->
+                <div id="cam_paginacion" class="pagination-container" style="display:none;">
+                    <button class="btn-pagination" onclick="cam_cambiarPag(-1)">
+                        <i class="fa-solid fa-chevron-left"></i> Anterior
+                    </button>
+                    <span class="pagination-info" id="cam_page_info"></span>
+                    <button class="btn-pagination" onclick="cam_cambiarPag(1)">
+                        Siguiente <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <div id="module-vehiculos" class="module-section">
+        <div class="topbar">
+            <h2 style="color:var(--brand); margin:0;">Control de Vehículos</h2>
+            <span class="badge"><i class="fa-solid fa-industry"></i> Zárate</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="active" onclick="veh_cambiarTab('registro')">🚗 Registrar Ingreso</button>
+            <button onclick="veh_cambiarTab('pendientes')">📋 Pendientes</button>
+        </div>
+
+        <div id="veh-tab-registro" class="tab-content active">
+            <div class="container">
+                <form id="veh_form">
+                    <input type="hidden" name="planta" value="Zárate">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <label>Portería</label>
+                            <select name="porteria" id="veh_porteria_sel" required>
+                                <option value="Porteria 1">Portería 1</option>
+                                <option value="Porteria 2">Portería 2</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>Entrada</label>
+                            <div class="input-contenedor">
+                                <input type="datetime-local" id="veh_entrada" name="entrada" required />
+                                <button type="button" id="veh_btnNow"><i class="fa-regular fa-clock"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <label>DNI</label>
+                            <div class="input-contenedor">
+                                <input type="text" id="veh_dni" name="dni" required pattern="[0-9]*" />
+                                <button type="button" id="veh_btnBuscarDni"><i
+                                        class="fa-solid fa-magnifying-glass"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <label>Patente</label>
+                            <input type="text" id="veh_patente" name="pte_numero" class="uppercase" required />
+                        </div>
+                        <div class="form-section"><label>Apellido y Nombre</label><input type="text" id="veh_nombre"
+                                name="apellido_nombre" required /></div>
+                        <div class="form-section"><label>Empresa</label><input type="text" id="veh_empresa"
+                                name="empresa" placeholder="Opcional" /></div>
+                        <div class="form-section"><label>Ingreso Remitos</label><input type="text"
+                                name="ingreso_remitos" placeholder="Opcional" /></div>
+
+                        <button type="submit" class="boton-registrar" id="veh_btnGuardar">Registrar Vehículo</button>
+                        <div id="veh_mensajes" style="margin-top:10px;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="veh-tab-pendientes" class="tab-content">
+            <div class="container-full">
+                <div class="filters">
+                    <button class="chip activo" onclick="veh_filtrar('')">Todas</button>
+                    <button class="chip" onclick="veh_filtrar('Porteria 1')">Portería 1</button>
+                    <button class="chip" onclick="veh_filtrar('Porteria 2')">Portería 2</button>
+                    <button class="chip" onclick="veh_cargar()"
+                        style="background:var(--ok); color:#fff; margin-left:auto;"><i
+                            class="fa-solid fa-rotate"></i></button>
+                </div>
+                <div class="table-container">
+                    <table id="veh-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Entrada</th>
+                                <th>DNI</th>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
+                                <th>Patente</th>
+                                <th>Ing. Remitos</th>
+                                <th>Egr. Remitos</th>
+                                <th>Portería</th>
+                                <th>Salida / Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="module-admin" class="module-section">
+        <div class="topbar">
+            <h2 style="color:var(--brand); margin:0;">Control de Administrativos</h2>
+            <span class="badge"><i class="fa-solid fa-industry"></i> Zárate</span>
+        </div>
+
+        <button class="btn-nuevo-float" onclick="adm_nuevoRegistro()">
+            <i class="fa-solid fa-plus"></i> Nuevo
+        </button>
+
+        <div class="nav-tabs">
+            <button class="active" onclick="adm_cambiarTab('registro')">👔 Registrar Entrada</button>
+            <button onclick="adm_cambiarTab('pendientes')">📋 Pendientes</button>
+        </div>
+
+        <div id="adm-tab-registro" class="tab-content active">
+            <div class="container">
+                <form id="adm_form">
+                    <input type="hidden" name="planta" value="Zárate">
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <label>Portería</label>
+                            <select id="adm_porteria" name="porteria" required>
+                                <option value="Porteria 1">Portería 1</option>
+                                <option value="Porteria 2">Portería 2</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>Entrada</label>
+                            <div class="input-contenedor">
+                                <input type="datetime-local" id="adm_entrada" name="entrada_admin" required />
+                                <button type="button" id="adm_btnNow"><i class="fa-regular fa-clock"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <label>Vehículo</label>
+                            <select id="adm_vehiculo" name="vehiculo" required>
+                                <option value="Auto">Auto</option>
+                                <option value="Camioneta">Camioneta</option>
+                                <option value="Camion">Camion</option>
+                            </select>
+                        </div>
+                        <div class="form-section">
+                            <label>Patente</label>
+                            <input type="text" id="adm_patente" name="patente" class="uppercase" required
+                                placeholder="AAA123" />
+                        </div>
+                        <div class="form-section">
+                            <label>Apellido y Nombre</label>
+                            <div class="input-contenedor">
+                                <input type="text" id="adm_nombre" name="apellido_nombre_admin" required />
+                                <button type="button" id="adm_btnBuscarNombre"><i
+                                        class="fa-solid fa-magnifying-glass"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-section">
+                            <label>Observaciones</label>
+                            <input type="text" id="adm_obs" name="observaciones" placeholder="Opcional" />
+                        </div>
+                        <button type="submit" class="boton-registrar" id="adm_btnGuardar">Registrar Admin</button>
+                        <div id="adm_mensajes" style="margin-top:10px;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="adm-tab-pendientes" class="tab-content">
+            <div class="container-full">
+                <div style="margin-bottom:10px;">
+                    <div class="status-dot" id="adm_status_dot"></div>
+                    <span id="adm_status_text">Verificando...</span>
+                </div>
+                <div class="filters">
+                    <button class="chip activo" onclick="adm_filtrar('')">Todas</button>
+                    <button class="chip" onclick="adm_filtrar('Porteria 1')">Portería 1</button>
+                    <button class="chip" onclick="adm_filtrar('Porteria 2')">Portería 2</button>
+                </div>
+                <div class="table-container">
+                    <table id="adm-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Entrada</th>
+                                <th>Vehículo</th>
+                                <th>Patente</th>
+                                <th>Nombre</th>
+                                <th>Obs</th>
+                                <th>Portería</th>
+                                <th>Salida</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==============================================
+           CONFIGURACIÓN GLOBAL Y UTILIDADES
+           ============================================== */
+        const MASTER_CONFIG = {
+            planta: 'Zárate'
+        };
+
+        // URLs (Conservadas de los originales)
+        const URLS = {
+            n8n_admin_reg: 'https://ramaravachino.xyz/webhook/admin-registrar',
+            n8n_admin_upd: 'https://ramaravachino.xyz/webhook/admin-actualizar',
+            apps_admin: 'https://script.google.com/macros/s/AKfycbyfcW9g8xdO6b7Tg1cj-qwuqo62Y4dIhYy93I6RsndsUE-okooEf6ornxJbqYr5k8vcgg/exec',
+
+            n8n_cam_reg: "https://ramiroravachino.app.n8n.cloud/webhook/camiones-registrar1",
+            n8n_cam_upd: "https://ramiroravachino.app.n8n.cloud/webhook/camiones-actualizar1",
+            n8n_cam_pend: "https://ramiroravachino.app.n8n.cloud/webhook/camiones-pendientes1",
+            apps_cam_auto: "https://script.google.com/macros/s/AKfycbzizEWA31FdwRjnscxsMchLZRF5eR100CJKPP1WjEjwngHmtDWTnGh-jRGuHUuZG7LCAA/exec",
+
+            n8n_veh_reg: 'https://ramiroravachino.app.n8n.cloud/webhook/vehiculos-registrar',
+            n8n_veh_upd: 'https://ramiroravachino.app.n8n.cloud/webhook/vehiculos-actualizar',
+            n8n_veh_pend: 'https://ramiroravachino.app.n8n.cloud/webhook/vehiculos-pendientes',
+            apps_veh_auto: "https://script.google.com/macros/s/AKfycbxZlgN9LeZgrZP_BZM0UMKlANQPNtfTFh-cPuM0arTEpOWXNpfRQf_gryGnje1qFoKz0g/exec"
+        };
+
+        function switchModule(module) {
+            document.querySelectorAll('.module-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.master-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(`module-${module}`).classList.add('active');
+
+            // Highlight navbar
+            const idx = module === 'camiones' ? 0 : module === 'vehiculos' ? 1 : 2;
+            document.querySelectorAll('.master-btn')[idx].classList.add('active');
+
+            // Cargar datos si es necesario al cambiar
+            if (module === 'camiones' && !cam_iniciado) cam_cargar();
+        }
+
+        function setNow(inputId) {
+            const el = document.getElementById(inputId);
+            if (el._flatpickr) {
+                el._flatpickr.setDate(new Date());
+            } else {
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                el.value = now.toISOString().slice(0, 16);
+            }
+        }
+
+        function fmtFecha(isoStr) {
+            if (!isoStr) return '';
+            const d = new Date(isoStr);
+            if (isNaN(d)) return isoStr;
+            return d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showMsg(containerId, text, isError = false) {
+            const el = document.getElementById(containerId);
+            el.innerHTML = `<div class="mensaje ${isError ? 'error' : 'exito'}">${text}</div>`;
+            setTimeout(() => el.innerHTML = '', 4000);
+        }
+
+        /* ==============================================
+           LÓGICA CAMIONES (Namespace: cam_)
+           ============================================== */
+        let cam_datos = [];
+        let cam_filtro_port = '';
+        let cam_filtro_text = '';
+        let cam_iniciado = false;
+        let cam_pag = 1;
+        const cam_por_pag = 20;
+
+        function cam_cambiarTab(tab) {
+            document.querySelectorAll('#module-camiones .nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#module-camiones .tab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'registro') {
+                document.querySelectorAll('#module-camiones .nav-tabs button')[0].classList.add('active');
+                document.getElementById('cam-tab-registro').classList.add('active');
+            } else {
+                document.querySelectorAll('#module-camiones .nav-tabs button')[1].classList.add('active');
+                document.getElementById('cam-tab-pendientes').classList.add('active');
+                cam_cargar();
+            }
+        }
+
+        async function cam_cargar(silent = false) {
+            cam_iniciado = true;
+            const tbody = document.querySelector('#cam-table tbody');
+            if (!silent) tbody.innerHTML = '<tr><td colspan="11">🔄 Cargando...</td></tr>';
+
+            try {
+                const url = `${URLS.n8n_cam_pend}?planta=Zárate&_t=${Date.now()}`;
+                const res = await fetch(url);
+                const json = await res.json();
+
+                // Normalización de respuesta n8n
+                let raw = [];
+                if (Array.isArray(json)) raw = json;
+                else if (json.data && Array.isArray(json.data)) raw = json.data;
+                else if (Array.isArray(json[0]?.data)) raw = json[0].data;
+
+                cam_datos = raw.sort((a, b) => new Date(b.ingreso) - new Date(a.ingreso));
+                cam_render();
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="11">❌ Error de conexión</td></tr>';
+            }
+        }
+
+        function cam_render() {
+            const tbody = document.querySelector('#cam-table tbody');
+            tbody.innerHTML = '';
+
+            let filtered = cam_datos.filter(item => {
+                // Filtro 1: Pendientes de algo
+                const esPendiente = !item.egreso || !item.ingreso_remito || !item.egreso_remito || !item.ingreso_bulto_2 || !item.egreso_bulto_2 || !item.ingreso2;
+                if (!esPendiente) return false;
+
+                // Filtro 2: Portería
+                if (cam_filtro_port && item.porteria !== cam_filtro_port) return false;
+
+                // Filtro 3: Texto
+                if (cam_filtro_text) {
+                    const txt = cam_filtro_text.toLowerCase();
+                    const combinada = `${item.chofer} ${item.patente} ${item.tractor} ${item.semi} ${item.transporte}`.toLowerCase();
+                    if (!combinada.includes(txt)) return false;
+                }
+                return true;
+            });
+
+            // Paginación simple
+            const total = filtered.length;
+            const totalPags = Math.ceil(total / cam_por_pag) || 1;
+            if (cam_pag > totalPags) cam_pag = 1;
+
+            // Actualizar contador de registros
+            const counterEl = document.getElementById('cam_total');
+            if (counterEl) counterEl.textContent = total;
+
+            document.getElementById('cam_paginacion').style.display = total > cam_por_pag ? 'flex' : 'none';
+            document.getElementById('cam_page_info').textContent = `Pág ${cam_pag} de ${totalPags}`;
+
+            const slice = filtered.slice((cam_pag - 1) * cam_por_pag, cam_pag * cam_por_pag);
+
+            if (slice.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11">No hay camiones pendientes.</td></tr>';
+                return;
+            }
+
+            slice.forEach(i => {
+                const tr = document.createElement('tr');
+                tr.className = 'pendiente';
+
+                // Estado de completitud visual
+                const estadoIngreso = i.ingreso2 ?
+                    '<span class="estado-badge completo">Completo</span>' :
+                    '<span class="estado-badge pendiente">Pendiente</span>';
+
+                // Generadores de inputs dinámicos con nuevos estilos
+                const inputIngreso2 = !i.ingreso2 ?
+                    `<div class="btn-group-tabla">
+                        <input type="datetime-local" id="cam_ing2_${i.id}" class="input-tabla">
+                        <button class="btn-tabla ingreso" onclick="cam_upd('${i.id}', 'ingreso2', 'cam_ing2_${i.id}')">
+                            <i class="fa-solid fa-right-to-bracket"></i> Ingreso
+                        </button>
+                    </div>`
+                    : '<span class="estado-badge completo">Ingresado</span>';
+
+                const inputEgreso = !i.egreso ?
+                    `<div class="btn-group-tabla">
+                        <input type="datetime-local" id="cam_egr_${i.id}" class="input-tabla">
+                        <button class="btn-tabla egreso" onclick="cam_upd('${i.id}', 'egreso', 'cam_egr_${i.id}')">
+                            <i class="fa-solid fa-right-from-bracket"></i> Egreso
+                        </button>
+                    </div>`
+                    : '<span class="estado-badge completo">Egresado</span>';
+
+                const inputEgRem = !i.egreso_remito ?
+                    `<div class="btn-group-tabla">
+                        <input type="text" id="cam_erem_${i.id}" placeholder="Nº Remito" class="input-tabla" style="width:90px;">
+                        <button class="btn-tabla remito" onclick="cam_upd('${i.id}', 'egreso_remito', 'cam_erem_${i.id}')">
+                            <i class="fa-solid fa-file-invoice"></i> E.Remito
+                        </button>
+                    </div>`
+                    : '<span class="estado-badge completo">✓</span>';
+
+                const inputEgBul = !i.egreso_bulto_2 ?
+                    `<div class="btn-group-tabla">
+                        <input type="text" id="cam_ebul_${i.id}" placeholder="Bulto" class="input-tabla" style="width:90px;">
+                        <button class="btn-tabla bulto" onclick="cam_upd('${i.id}', 'egreso_bulto_2', 'cam_ebul_${i.id}')">
+                            <i class="fa-solid fa-box"></i> E.Bulto
+                        </button>
+                    </div>`
+                    : '<span class="estado-badge completo">✓</span>';
+
+                tr.innerHTML = `
+                    <td><span class="celda-id">#${i.id}</span></td>
+                    <td title="${i.chofer || ''}" class="celda-transporte">${i.chofer?.substring(0, 14) || '-'}${i.chofer && i.chofer.length > 14 ? '...' : ''}</td>
+                    <td><span class="celda-patente">${i.tractor || '-'}</span></td>
+                    <td><span class="celda-patente">${i.semi || '-'}</span></td>
+                    <td class="celda-fecha">${fmtFecha(i.ingreso)}</td>
+                    <td title="${i.transporte || ''}" class="celda-transporte">${i.transporte?.substring(0, 12) || '-'}${i.transporte && i.transporte.length > 12 ? '...' : ''}</td>
+                    <td>${inputEgreso}</td>
+                    <td>
+                        <div style="font-size:11px; margin-bottom:4px; color:#64748b;">Ing: <strong>${i.ingreso_remito || '-'}</strong></div>
+                        ${inputEgRem}
+                    </td>
+                    <td>
+                        <div style="font-size:11px; margin-bottom:4px; color:#64748b;">Ing: <strong>${i.ingreso_bulto_2 || '-'}</strong></div>
+                        ${inputEgBul}
+                    </td>
+                    <td><span class="celda-porteria"><i class="fa-solid fa-building"></i> ${i.porteria}</span></td>
+                    <td>${inputIngreso2}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Inicializar Flatpickr en los nuevos inputs
+            slice.forEach(i => {
+                if (!i.egreso) flatpickr(`#cam_egr_${i.id}`, { enableTime: true, dateFormat: "Y-m-d H:i", defaultDate: new Date() });
+                if (!i.ingreso2) flatpickr(`#cam_ing2_${i.id}`, { enableTime: true, dateFormat: "Y-m-d H:i", defaultDate: new Date() });
+            });
+        }
+
+        async function cam_upd(id, campo, inputId) {
+            const val = document.getElementById(inputId).value;
+            if (!val) return alert('Dato requerido');
+
+            const btn = document.querySelector(`#${inputId} + button`) || document.querySelector(`#${inputId}`).nextElementSibling;
+            if (btn) btn.textContent = '⏳';
+
+            const body = new URLSearchParams({ tipo: 'camiones', id, planta: 'Zárate', [campo]: val });
+            try {
+                await fetch(URLS.n8n_cam_upd, { method: 'POST', body });
+                cam_cargar(true); // Recarga silenciosa
+            } catch (e) {
+                alert('Error al actualizar');
+            }
+        }
+
+        function cam_filtrar(planta, porteria) {
+            cam_filtro_port = porteria;
+            document.querySelectorAll('#module-camiones .chip').forEach(c => c.classList.remove('activo'));
+            event.target.classList.add('activo'); // Hack rápido para highlight
+            cam_pag = 1;
+            cam_render();
+        }
+
+        function cam_cambiarPag(dir) {
+            cam_pag += dir;
+            cam_render();
+        }
+
+        /* Registro Camiones */
+        document.getElementById('cam_form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('cam_btnGuardar');
+            btn.disabled = true; btn.textContent = 'Enviando...';
+
+            const fd = new FormData(e.target);
+            const data = Object.fromEntries(fd);
+            data.tipo = 'camiones';
+            data.ingreso = data.ingreso.replace('T', ' ');
+
+            try {
+                const res = await fetch(URLS.n8n_cam_reg, { method: 'POST', body: new URLSearchParams(data) });
+                if (res.ok) {
+                    showMsg('cam_mensajes', '✅ Camión registrado');
+                    e.target.reset();
+                    setNow('cam_ingreso');
+                } else throw new Error();
+            } catch (e) {
+                showMsg('cam_mensajes', '❌ Error al registrar', true);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Registrar Camión';
+            }
+        });
+
+        document.getElementById('cam_buscar_texto').addEventListener('input', (e) => {
+            cam_filtro_text = e.target.value;
+            cam_pag = 1;
+            cam_render();
+        });
+
+        document.getElementById('cam_btnBuscarDni').addEventListener('click', async () => {
+            const dni = document.getElementById('cam_dni').value;
+            if (!dni) return;
+            document.getElementById('cam_chofer').placeholder = "Buscando...";
+            try {
+                const res = await fetch(`${URLS.apps_cam_auto}?tipo=camiones&dni=${dni}&planta=Zárate`);
+                const d = await res.json();
+                if (!d.error) {
+                    document.getElementById('cam_chofer').value = d.chofer || '';
+                    document.getElementById('cam_transporte').value = d.transporte || '';
+                    document.getElementById('cam_tractor').value = d.tractor || '';
+                    document.getElementById('cam_semi').value = d.semi || '';
+                }
+            } catch (e) { console.error(e); }
+            document.getElementById('cam_chofer').placeholder = "";
+        });
+
+
+        /* ==============================================
+           LÓGICA VEHÍCULOS (Namespace: veh_)
+           ============================================== */
+        let veh_datos = [];
+        let veh_filtro_port = '';
+
+        function veh_cambiarTab(tab) {
+            document.querySelectorAll('#module-vehiculos .nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#module-vehiculos .tab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'registro') {
+                document.querySelectorAll('#module-vehiculos .nav-tabs button')[0].classList.add('active');
+                document.getElementById('veh-tab-registro').classList.add('active');
+            } else {
+                document.querySelectorAll('#module-vehiculos .nav-tabs button')[1].classList.add('active');
+                document.getElementById('veh-tab-pendientes').classList.add('active');
+                veh_cargar();
+            }
+        }
+
+        async function veh_cargar() {
+            const tbody = document.querySelector('#veh-table tbody');
+            tbody.innerHTML = '<tr><td colspan="10">🔄 Cargando...</td></tr>';
+            try {
+                const url = `${URLS.n8n_veh_pend}?planta=Zárate`;
+                const res = await fetch(url);
+                const json = await res.json();
+                const raw = Array.isArray(json) ? json : (json.data || []);
+                veh_datos = raw;
+                veh_render();
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="10">❌ Error</td></tr>';
+            }
+        }
+
+        function veh_render() {
+            const tbody = document.querySelector('#veh-table tbody');
+            tbody.innerHTML = '';
+
+            const filtrados = veh_datos.filter(v => {
+                if (veh_filtro_port && v.porteria !== veh_filtro_port) return false;
+                // Mostrar solo si falta salida O falta remito de egreso (si hubo ingreso remito)
+                return !(v.salida && v.egreso_remitos);
+            });
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10">No hay vehículos pendientes.</td></tr>'; return;
+            }
+
+            filtrados.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = 'pendiente';
+
+                // Lógica de acciones con nuevos estilos
+                let accSalida = v.salida ?
+                    '<span class="estado-badge completo">Salió</span>' :
+                    `<div class="btn-group-tabla">
+                        <input type="datetime-local" id="veh_sal_${v.id}" class="input-tabla">
+                        <button class="btn-tabla egreso" onclick="veh_upd('${v.id}','salida','veh_sal_${v.id}')">
+                            <i class="fa-solid fa-right-from-bracket"></i> Salida
+                        </button>
+                    </div>`;
+
+                let accRemito = v.egreso_remitos ?
+                    `<span class="estado-badge completo">${v.egreso_remitos}</span>` :
+                    `<div class="btn-group-tabla">
+                        <input type="text" id="veh_rem_${v.id}" placeholder="Nº Remito" class="input-tabla" style="width:90px;">
+                        <button class="btn-tabla remito" onclick="veh_upd('${v.id}','egreso_remitos','veh_rem_${v.id}')">
+                            <i class="fa-solid fa-file-invoice"></i> Remito
+                        </button>
+                    </div>`;
+
+                tr.innerHTML = `
+                    <td><span class="celda-id">#${v.id}</span></td>
+                    <td class="celda-fecha">${fmtFecha(v.entrada)}</td>
+                    <td><strong>${v.dni || '-'}</strong></td>
+                    <td class="celda-transporte" title="${v.apellido_nombre || ''}">${v.apellido_nombre || '-'}</td>
+                    <td style="color:#64748b; font-size:12px;">${v.empresa || '-'}</td>
+                    <td><span class="celda-patente">${v.patente || '-'}</span></td>
+                    <td>${v.ingreso_remitos ? `<span class="estado-badge vacio">${v.ingreso_remitos}</span>` : '<span style="color:#94a3b8;">-</span>'}</td>
+                    <td>${accRemito}</td>
+                    <td><span class="celda-porteria"><i class="fa-solid fa-building"></i> ${v.porteria}</span></td>
+                    <td>${accSalida}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Init flatpickr para vehiculos salida
+            filtrados.forEach(v => {
+                if (!v.salida) flatpickr(`#veh_sal_${v.id}`, { enableTime: true, dateFormat: "Y-m-d H:i", defaultDate: new Date() });
+            });
+        }
+
+        async function veh_upd(id, campo, domId) {
+            const val = document.getElementById(domId).value;
+            if (!val) return alert('Valor requerido');
+
+            const body = new URLSearchParams({ id, planta: 'Zárate', [campo]: val });
+            try {
+                await fetch(URLS.n8n_veh_upd, { method: 'POST', body });
+                veh_cargar();
+            } catch (e) { alert('Error'); }
+        }
+
+        function veh_filtrar(p) {
+            veh_filtro_port = p;
+            document.querySelectorAll('#module-vehiculos .chip').forEach(c => c.classList.remove('activo'));
+            event.target.classList.add('activo');
+            veh_render();
+        }
+
+        // Registro Vehículos
+        document.getElementById('veh_form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('veh_btnGuardar');
+            btn.disabled = true; btn.textContent = 'Procesando...';
+
+            const fd = new FormData(e.target);
+            try {
+                await fetch(URLS.n8n_veh_reg, { method: 'POST', body: new URLSearchParams(fd) });
+                showMsg('veh_mensajes', '✅ Vehículo registrado');
+                e.target.reset();
+                setNow('veh_entrada');
+            } catch (e) {
+                showMsg('veh_mensajes', '❌ Error', true);
+            } finally { btn.disabled = false; btn.textContent = 'Registrar Vehículo'; }
+        });
+
+        document.getElementById('veh_btnBuscarDni').addEventListener('click', async () => {
+            const dni = document.getElementById('veh_dni').value;
+            if (!dni) return;
+            document.getElementById('veh_nombre').value = 'Buscando...';
+            try {
+                const res = await fetch(`${URLS.apps_veh_auto}?tipo=vehiculos&dni=${dni}&planta=Zárate`);
+                const d = await res.json();
+                if (!d.error) {
+                    document.getElementById('veh_nombre').value = d.apellido_nombre || '';
+                    document.getElementById('veh_empresa').value = d.empresa || '';
+                    document.getElementById('veh_patente').value = d.patente || '';
+                } else { document.getElementById('veh_nombre').value = ''; }
+            } catch (e) { console.error(e); }
+        });
+
+
+        /* ==============================================
+           LÓGICA ADMINISTRATIVOS (Namespace: adm_)
+           ============================================== */
+        let adm_datos = [];
+        let adm_filtro_port = '';
+
+        function adm_cambiarTab(tab) {
+            document.querySelectorAll('#module-admin .nav-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('#module-admin .tab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'registro') {
+                document.querySelectorAll('#module-admin .nav-tabs button')[0].classList.add('active');
+                document.getElementById('adm-tab-registro').classList.add('active');
+            } else {
+                document.querySelectorAll('#module-admin .nav-tabs button')[1].classList.add('active');
+                document.getElementById('adm-tab-pendientes').classList.add('active');
+                adm_cargar();
+            }
+        }
+
+        function adm_nuevoRegistro() {
+            adm_cambiarTab('registro');
+            document.getElementById('adm_form').reset();
+            setNow('adm_entrada');
+        }
+
+        async function adm_cargar() {
+            const status = document.getElementById('adm_status_dot');
+            const tbody = document.querySelector('#adm-table tbody');
+            status.className = 'status-dot loading';
+            tbody.innerHTML = '<tr><td colspan="8">Cargando...</td></tr>';
+
+            try {
+                const url = `${URLS.apps_admin}?tipo=pendientes&planta=Zárate`;
+                const res = await fetch(url);
+                const json = await res.json();
+                adm_datos = Array.isArray(json) ? json : [];
+                status.className = 'status-dot online';
+                adm_render();
+            } catch (e) {
+                status.className = 'status-dot offline';
+                tbody.innerHTML = '<tr><td colspan="8">❌ Error de conexión</td></tr>';
+            }
+        }
+
+        function adm_render() {
+            const tbody = document.querySelector('#adm-table tbody');
+            tbody.innerHTML = '';
+
+            const filtrados = adm_datos.filter(d => !adm_filtro_port || d.porteria === adm_filtro_port);
+
+            if (!filtrados.length) {
+                tbody.innerHTML = '<tr><td colspan="8">Sin pendientes.</td></tr>'; return;
+            }
+
+            filtrados.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.className = 'pendiente';
+                tr.innerHTML = `
+                    <td><span class="celda-id">#${d.id}</span></td>
+                    <td class="celda-fecha">${fmtFecha(d.entrada)}</td>
+                    <td>
+                        <span style="display:inline-flex; align-items:center; gap:4px; background:#f0f9ff; padding:4px 8px; border-radius:6px; font-weight:600; color:#0369a1; font-size:11px;">
+                            <i class="fa-solid fa-${d.vehiculo === 'Auto' ? 'car' : d.vehiculo === 'Camioneta' ? 'truck-pickup' : 'truck'}"></i>
+                            ${d.vehiculo}
+                        </span>
+                    </td>
+                    <td><span class="celda-patente">${d.patente || '-'}</span></td>
+                    <td class="celda-transporte" title="${d.apellido_nombre || ''}">${d.apellido_nombre || '-'}</td>
+                    <td style="color:#64748b; font-size:12px; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.observaciones || ''}">${d.observaciones || '-'}</td>
+                    <td><span class="celda-porteria"><i class="fa-solid fa-building"></i> ${d.porteria}</span></td>
+                    <td>
+                        <div class="btn-group-tabla">
+                            <input type="datetime-local" id="adm_out_${d.id}" class="input-tabla">
+                            <button class="btn-tabla egreso" onclick="adm_salida(${d.id})">
+                                <i class="fa-solid fa-right-from-bracket"></i> Salida
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            // Init flatpickr
+            filtrados.forEach(d => {
+                flatpickr(`#adm_out_${d.id}`, { enableTime: true, dateFormat: "Y-m-d H:i", defaultDate: new Date() });
+            });
+        }
+
+        async function adm_salida(id) {
+            const val = document.getElementById(`adm_out_${id}`).value;
+            if (!val) return alert('Fecha requerida');
+
+            const body = new URLSearchParams({ tipo: 'admin', id, salida: val.replace('T', ' '), planta: 'Zárate' });
+            try {
+                const res = await fetch(URLS.n8n_admin_upd, { method: 'POST', body });
+                if (res.ok) adm_cargar();
+                else alert('Error en servidor');
+            } catch (e) { alert('Error de red'); }
+        }
+
+        function adm_filtrar(p) {
+            adm_filtro_port = p;
+            document.querySelectorAll('#module-admin .chip').forEach(c => c.classList.remove('activo'));
+            event.target.classList.add('activo');
+            adm_render();
+        }
+
+        // Registro Admin
+        document.getElementById('adm_form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('adm_btnGuardar');
+            btn.disabled = true; btn.textContent = 'Registrando...';
+
+            const fd = new FormData(e.target);
+            const data = Object.fromEntries(fd);
+            data.tipo = 'admin';
+
+            try {
+                const res = await fetch(URLS.n8n_admin_reg, { method: 'POST', body: new URLSearchParams(data) });
+                if (res.ok) {
+                    showMsg('adm_mensajes', '✅ Administrativo registrado');
+                    e.target.reset();
+                    setNow('adm_entrada');
+                } else throw new Error();
+            } catch (e) {
+                showMsg('adm_mensajes', '❌ Error', true);
+            } finally { btn.disabled = false; btn.textContent = 'Registrar Admin'; }
+        });
+
+        document.getElementById('adm_btnBuscarNombre').addEventListener('click', async () => {
+            const nom = document.getElementById('adm_nombre').value;
+            if (!nom) return;
+            document.getElementById('adm_patente').value = '...';
+            try {
+                const res = await fetch(`${URLS.apps_admin}?tipo=buscar_nombre&planta=Zárate&apellido_nombre=${encodeURIComponent(nom)}`);
+                const d = await res.json();
+                document.getElementById('adm_patente').value = d.patente || '';
+            } catch (e) { console.error(e); }
+        });
+
+
+        /* ==============================================
+           INICIALIZACIÓN MAESTRA
+           ============================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar Flatpickr en los inputs principales de registro
+            flatpickr("#cam_ingreso", { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, locale: "es", defaultDate: new Date() });
+            flatpickr("#veh_entrada", { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, locale: "es", defaultDate: new Date() });
+            flatpickr("#adm_entrada", { enableTime: true, dateFormat: "Y-m-d H:i", time_24hr: true, locale: "es", defaultDate: new Date() });
+
+            // Botones "Ahora"
+            document.getElementById('cam_btnNow').onclick = () => setNow('cam_ingreso');
+            document.getElementById('veh_btnNow').onclick = () => setNow('veh_entrada');
+            document.getElementById('adm_btnNow').onclick = () => setNow('adm_entrada');
+
+            // Mayúsculas inputs
+            document.querySelectorAll('.uppercase').forEach(el => {
+                el.addEventListener('input', e => e.target.value = e.target.value.toUpperCase());
+            });
+
+            // Arrancar en la pestaña por defecto (Camiones)
+            switchModule('camiones');
+        });
+
+    </script>
 </body>
 
 </html>
